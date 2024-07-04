@@ -9,6 +9,7 @@ import Spinner from '../Spinner';
 import User from '../User';
 import styles from './UsersLoader.module.scss';
 import NationOption from '../NationOption';
+import LoadedUsersResultsAmountRadiobutton from '../LoadedUsersResultsAmountRadiobutton/LoadedUsersResultsAmountRadiobutton';
 
 const nats = ['us', 'dk', 'fr', 'gb'];
 
@@ -85,10 +86,10 @@ class UsersLoader extends Component {
     this.setState({ currentNat: value });
   };
 
-  showUsers = (currentUser) => <User user={currentUser} />;
+  showUsers = (user) => <User user={user} />;
 
   // Обработчик вывода опшинов селекта по национальностям
-  showOptions = (nat, i) => <NationOption keyIndex={i} nation={nat} />;
+  showOptions = (nat, i) => <NationOption key={i} nat={nat} />;
 
   render() {
     // Выгружаем всё из стейта
@@ -114,36 +115,21 @@ class UsersLoader extends Component {
           </select>
           <div>
             {/* Отображаем радиобаттоны выбора количества выводимых результатов */}
-            <label>
-              <input
-                name="results"
-                type="radio"
-                value={5}
-                checked={currentResults === 5}
-                onChange={this.handlerResults}
-              />
-              5
-            </label>
-            <label>
-              <input
-                name="results"
-                type="radio"
-                value={10}
-                checked={currentResults === 10}
-                onChange={this.handlerResults}
-              />
-              10
-            </label>
-            <label>
-              <input
-                name="results"
-                type="radio"
-                value={15}
-                checked={currentResults === 15}
-                onChange={this.handlerResults}
-              />
-              15
-            </label>
+            <LoadedUsersResultsAmountRadiobutton
+              value={5}
+              checked={currentResults === 5}
+              onChange={this.handlerResults}
+            />
+            <LoadedUsersResultsAmountRadiobutton
+              value={10}
+              checked={currentResults === 10}
+              onChange={this.handlerResults}
+            />
+            <LoadedUsersResultsAmountRadiobutton
+              value={15}
+              checked={currentResults === 15}
+              onChange={this.handlerResults}
+            />
           </div>
         </div>
         {users.length ? (
