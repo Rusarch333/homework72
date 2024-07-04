@@ -6,6 +6,8 @@ import PropTypes from 'prop-types';
 import { getUsers } from '../../api';
 // Выгружаем лоадер
 import Spinner from '../Spinner';
+import User from '../User';
+import styles from './UsersLoader.module.scss';
 
 const nats = ['us', 'dk', 'fr', 'gb'];
 
@@ -57,7 +59,6 @@ class UsersLoader extends Component {
     }
   }
 
-  showUsers = (user) => <li key={user.login.uuid}>{user.name.first}</li>;
   prevPage = () => {
     this.setState((state, props) => {
       const { currentPage } = state;
@@ -73,15 +74,17 @@ class UsersLoader extends Component {
     });
   };
 
-    // Обработчик выбора количества результатов - записываем количество в стейт!
+  // Обработчик выбора количества результатов - записываем количество в стейт!
   handlerResults = ({ target: { value } }) => {
     this.setState({ currentResults: Number(value) });
   };
 
-    // Обработчик выбора национальности - записываем национальность в стейт!
+  // Обработчик выбора национальности - записываем национальность в стейт!
   handlerNat = ({ target: { value } }) => {
     this.setState({ currentNat: value });
   };
+
+  showUsers = (currentUser) => <User user={currentUser} />;
 
   // Обработчик вывода опшинов селекта по национальностям
   showOptions = (nat, i) => (
@@ -108,7 +111,7 @@ class UsersLoader extends Component {
           <button onClick={this.prevPage}>&lt; {/*&lt; - unicode */} </button>
           <span> {currentPage} </span>
           <button onClick={this.nextPage}>&gt;</button>
-           {/* Отображаем селект выбора национальности */}
+          {/* Отображаем селект выбора национальности */}
           <select name="nat" value={currentNat} onChange={this.handlerNat}>
             {nats.map(this.showOptions)}
           </select>
