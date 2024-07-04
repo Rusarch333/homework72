@@ -2,17 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styles from './NationOption.module.scss';
 
-const NationOption = () => {
+const NationOption = ({keyIndex, nation}) => {
   return (
-    <div>
-      
-    </div>
+    <option key={keyIndex} value={nation}>
+      {nation}
+    </option>
   );
 };
 
-
 NationOption.propTypes = {
-
+  keyIndex: PropTypes.number.isRequired,
+  nation: PropTypes.string.isRequired
 };
 
 

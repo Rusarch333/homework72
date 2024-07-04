@@ -8,6 +8,7 @@ import { getUsers } from '../../api';
 import Spinner from '../Spinner';
 import User from '../User';
 import styles from './UsersLoader.module.scss';
+import NationOption from '../NationOption';
 
 const nats = ['us', 'dk', 'fr', 'gb'];
 
@@ -87,11 +88,7 @@ class UsersLoader extends Component {
   showUsers = (currentUser) => <User user={currentUser} />;
 
   // Обработчик вывода опшинов селекта по национальностям
-  showOptions = (nat, i) => (
-    <option key={i} value={nat}>
-      {nat}
-    </option>
-  );
+  showOptions = (nat, i) => <NationOption keyIndex={i} nation={nat} />;
 
   render() {
     // Выгружаем всё из стейта
@@ -150,7 +147,9 @@ class UsersLoader extends Component {
           </div>
         </div>
         {users.length ? (
-          <ul>{users.map(this.showUsers)}</ul>
+          <ul className={styles['users-container']}>
+            {users.map(this.showUsers)}
+          </ul>
         ) : (
           <p>empty list of users</p>
         )}
