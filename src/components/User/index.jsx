@@ -8,7 +8,7 @@ const User = ({ user }) => {
     <li className={styles['user-container__user']} key={user.login.uuid}>
       <figure className={styles['li']}>
         <img src={user.picture.medium} alt={userFullName + 'avatar'} />
-        <figcaption className={styles['user__full-name-caption general__word-break']}>{userFullName}</figcaption>
+        <figcaption className={styles['user__full-name-caption']}>{userFullName}</figcaption>
       </figure>
     </li>
   );

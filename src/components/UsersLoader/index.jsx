@@ -1,17 +1,15 @@
 // Код разобран в предыдущем проекте, тут мы лишь рассмотрим 72 урок и сетевые запросы!
-
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import styles from './UsersLoader.module.scss';
 // Выгружаем сетевые запросы
 import { getUsers } from '../../api';
 // Выгружаем лоадер
 import Spinner from '../Spinner';
-import User from '../User';
-import styles from './UsersLoader.module.scss';
+import PagginationBlock from '../PagginationBlock';
 import NationOption from '../NationOption';
-import LoadedUsersResultsAmountRadiobutton from '../LoadedUsersResultsAmountRadiobutton/LoadedUsersResultsAmountRadiobutton';
-
-const nats = ['us', 'dk', 'fr', 'gb'];
+import LoadedUsersAmountRadiobutton from '../LoadedUsersAmountRadiobutton';
+import User from '../User';
+import CONSTANTS from '../../CONSTANTS';
 
 class UsersLoader extends Component {
   constructor(props) {
@@ -21,17 +19,37 @@ class UsersLoader extends Component {
       isPending: false,
       error: null,
       currentPage: 1,
-      // Добавили переменные к сетевому запросу
-      currentResults: 5,
+      currentResultsAmount: 5,
       currentNat: 'gb',
     };
   }
 
+  componentDidMount() {
+    this.load();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // Делаем лоад, если из интерфейса выбрали фильтр на другой нации или запросили вывести другое количество результатов
+    if (
+      prevState.currentPage !== this.state.currentPage ||
+      prevState.currentResultsAmount !== this.state.currentResultsAmount ||
+      prevState.currentNat !== this.state.currentNat
+    ) {
+      this.load();
+    }
+  }
+
+  // Обработчик изменения текущей страницы через пагинацию
+  setCurrentPage = (newPage) => {
+    this.setState({ currentPage: newPage });
+  };
+
   load = () => {
-    const { currentPage, currentResults, currentNat } = this.state;
+    const { currentPage, currentResultsAmount, currentNat } = this.state;
     this.setState({ isPending: true });
+
     // Сетевой запрос
-    getUsers({ page: currentPage, results: currentResults, nat: currentNat })
+    getUsers({ page: currentPage, results: currentResultsAmount, nat: currentNat })
       .then((data) => {
         if (data.error) {
           throw new Error(data.error);
@@ -46,55 +64,38 @@ class UsersLoader extends Component {
       });
   };
 
-  componentDidMount() {
-    this.load();
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    // Делаем лоад, если из интерфайса выбрали фильтр на другой нации или запросили вывести другое количество результатов
-    if (
-      prevState.currentPage !== this.state.currentPage ||
-      prevState.currentResults !== this.state.currentResults ||
-      prevState.currentNat !== this.state.currentNat
-    ) {
-      this.load();
-    }
-  }
-
-  prevPage = () => {
-    this.setState((state, props) => {
-      const { currentPage } = state;
-      if (currentPage > 1) {
-        return { currentPage: currentPage - 1 };
-      }
-    });
-  };
-  nextPage = () => {
-    this.setState((state, props) => {
-      const { currentPage } = state;
-      return { currentPage: currentPage + 1 };
-    });
-  };
-
   // Обработчик выбора количества результатов - записываем количество в стейт!
-  handlerResults = ({ target: { value } }) => {
-    this.setState({ currentResults: Number(value) });
+  handleChangeResultsAmount = ({ target: { value } }) => {
+    this.setState({ currentResultsAmount: Number(value) });
   };
 
   // Обработчик выбора национальности - записываем национальность в стейт!
-  handlerNat = ({ target: { value } }) => {
+  handleChangeNat = ({ target: { value } }) => {
     this.setState({ currentNat: value });
   };
 
-  showUsers = (user) => <User user={user} />;
+  // Функция вывода юзеров
+  showUsers = (user, i) => <User key={i} user={user} />;
 
-  // Обработчик вывода опшинов селекта по национальностям
-  showOptions = (nat, i) => <NationOption key={i} nat={nat} />;
+  // Функция вывода опшинов селекта по национальностям
+  showNatsOptions = (nat, i) => <NationOption key={i} nat={nat} />;
+
+  // Функция вывода радиобаттонов количества выгружаемых юзеров
+  showLoadedUsersAmountRadiobuttons = (amount, i) => {
+    const { currentResultsAmount } = this.state;
+    return (
+      <LoadedUsersAmountRadiobutton
+        key={i}
+        value={amount}
+        checked={currentResultsAmount === amount}
+        handleChangeResultsAmount={this.handleChangeResultsAmount}
+      />
+    );
+  };
 
   render() {
     // Выгружаем всё из стейта
-    const { users, isPending, error, currentPage, currentResults, currentNat } =
-      this.state;
+    const { users, isPending, error, currentPage, currentNat } = this.state;
     if (isPending) {
       // Отображаем наш лоадер, вместо просто надписи
       return <Spinner />;
@@ -106,32 +107,28 @@ class UsersLoader extends Component {
       <section>
         <h2>Users:</h2>
         <div>
-          <button onClick={this.prevPage}>&lt; {/*&lt; - unicode */} </button>
-          <span> {currentPage} </span>
-          <button onClick={this.nextPage}>&gt;</button>
+          {/* Блок пагинации */}
+          <PagginationBlock
+            currentPage={currentPage}
+            setCurrentPage={this.setCurrentPage}
+          />
           {/* Отображаем селект выбора национальности */}
-          <select name="nat" value={currentNat} onChange={this.handlerNat}>
-            {nats.map(this.showOptions)}
+          <select
+            className={styles['nat']}
+            name="nat"
+            value={currentNat}
+            onChange={this.handleChangeNat}
+          >
+            {CONSTANTS.NATS.map(this.showNatsOptions)}
           </select>
+          {/* Отображаем радиобаттоны выбора количества выводимых результатов */}
           <div>
-            {/* Отображаем радиобаттоны выбора количества выводимых результатов */}
-            <LoadedUsersResultsAmountRadiobutton
-              value={5}
-              checked={currentResults === 5}
-              onChange={this.handlerResults}
-            />
-            <LoadedUsersResultsAmountRadiobutton
-              value={10}
-              checked={currentResults === 10}
-              onChange={this.handlerResults}
-            />
-            <LoadedUsersResultsAmountRadiobutton
-              value={15}
-              checked={currentResults === 15}
-              onChange={this.handlerResults}
-            />
+            {CONSTANTS.LOADED_USERS_RESULTS_AMOUNT.map(
+              this.showLoadedUsersAmountRadiobuttons
+            )}
           </div>
         </div>
+        {/* Отображаем пользователей */}
         {users.length ? (
           <ul className={styles['users-container']}>
             {users.map(this.showUsers)}
@@ -143,7 +140,5 @@ class UsersLoader extends Component {
     );
   }
 }
-
-UsersLoader.propTypes = {};
 
 export default UsersLoader;
